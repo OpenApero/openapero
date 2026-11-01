@@ -76,6 +76,9 @@ jobs:
       - name: Run tests
         run: |
           cd $HOME/catkin_ws
+          # Each step is a fresh sh without the image's entrypoint: catkin_test_results is on the PATH only
+          # once ROS is sourced.
+          . /opt/ros/${{ matrix.config.rosdistro }}/setup.sh
           # Open Apero's own packages only (--no-deps); eigen_checks' tests do not build.
           # catkin_test_results fails the step on a failed test.
           OWNED="open_apero_analysis open_apero_controllers open_apero_core open_apero_ros open_apero_graph_benchmark open_apero_habitat open_apero_voxblox"
