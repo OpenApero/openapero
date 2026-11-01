@@ -1,0 +1,51 @@
+# Commit-time checks: `pre-commit install` once per clone, `pre-commit run --all-files` to check
+# the whole tree as CI's portability.yml does. Only tracked files of this repository are inspected:
+# pre-commit does not descend into the deps/voxblox submodule.
+#
+# Formatting: clang-format 10.0.1 (the Ubuntu 20.04 version; others format a few constructs
+# differently) with .clang-format, and black and ruff with pyproject.toml. They rewrite what they
+# fix, so a commit they change is refused once; add the changes and commit again. The vendored
+# third_party/ headers stay byte-identical to their upstream releases.
+repos:
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v10.0.1
+    hooks:
+      - id: clang-format
+        types_or: [c++, c]
+        exclude: /third_party/
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.10.1
+    hooks:
+      - id: black
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.2
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # roslaunch parses launch files with expat, which is strict: a "--" inside an XML comment, a
+      # bare "&" or an unescaped "<" makes the whole file unloadable at runtime rather than at
+      # review time. identify gives .launch no file type, hence the explicit pattern.
+      - id: check-xml
+        name: launch files are well-formed XML
+        files: \.launch$
+        types: [file]
+
+  - repo: local
+    hooks:
+      # A home-directory or removable-media path makes a fresh clone unusable. Fix a hit with
+      # $(env VAR) for locations outside the repo (add the variable to datasets.env.example and
+      # docs/installation.md), $(find <package>) for assets inside it, $(env HOME) or a
+      # runtime-derived path for outputs, or a required launch <arg> for user-supplied inputs.
+      # The container user's home in the Docker image (open_apero) is allowed: it is not a path on
+      # any host.
+      - id: no-absolute-paths
+        name: no machine-specific absolute paths
+        language: pygrep
+        entry: '/(home/(?!open_apero([^\w-]|$))|Users/|media/)'
+        types: [text]

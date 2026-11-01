@@ -1,0 +1,110 @@
+# Doxyfile for Open Apero
+# Generates XML output for Breathe/Sphinx integration
+# Compatible with Doxygen 1.8.17+
+
+#---------------------------------------------------------------------------
+# Project related
+#---------------------------------------------------------------------------
+PROJECT_NAME           = "Open Apero"
+PROJECT_BRIEF          = "Open Active Perception Library for Robotics"
+PROJECT_NUMBER         =
+OUTPUT_DIRECTORY       = ./generated
+CREATE_SUBDIRS         = NO
+
+# generate_docs.sh sets the REPO_ROOT environment variable, so paths resolve
+# regardless of where doxygen is invoked.
+
+#---------------------------------------------------------------------------
+# Input
+#---------------------------------------------------------------------------
+# Public headers only: the sources carry no doc comments, and Doxygen would parse the .msg files as C++.
+INPUT                  = $(REPO_ROOT)/open_apero_core/include \
+                         $(REPO_ROOT)/open_apero_ros/include \
+                         $(REPO_ROOT)/open_apero_voxblox/include \
+                         $(REPO_ROOT)/open_apero_graph_benchmark/include \
+                         $(REPO_ROOT)/open_apero_ros_bridge/include
+RECURSIVE              = YES
+FILE_PATTERNS          = *.h \
+                         *.hpp
+# Repository-relative locations, and include lines as users write them (#include <open_apero_core/...>).
+STRIP_FROM_PATH        = $(REPO_ROOT)
+STRIP_FROM_INC_PATH    = $(REPO_ROOT)/open_apero_core/include \
+                         $(REPO_ROOT)/open_apero_ros/include \
+                         $(REPO_ROOT)/open_apero_voxblox/include \
+                         $(REPO_ROOT)/open_apero_graph_benchmark/include \
+                         $(REPO_ROOT)/open_apero_ros_bridge/include
+# third_party/ holds the vendored single-header libraries (nanoflann, tinycolormap).
+EXCLUDE_PATTERNS       = */third_party/*
+
+#---------------------------------------------------------------------------
+# Build related
+#---------------------------------------------------------------------------
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+SORT_MEMBER_DOCS       = YES
+SORT_BRIEF_DOCS        = YES
+GENERATE_TODOLIST      = YES
+GENERATE_BUGLIST       = YES
+GENERATE_DEPRECATEDLIST= YES
+
+#---------------------------------------------------------------------------
+# Warning & progress
+#---------------------------------------------------------------------------
+QUIET                  = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+
+#---------------------------------------------------------------------------
+# Source browsing (off: Breathe renders neither listings nor cross-references)
+#---------------------------------------------------------------------------
+SOURCE_BROWSER         = NO
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = NO
+REFERENCED_BY_RELATION = NO
+REFERENCES_RELATION    = NO
+
+#---------------------------------------------------------------------------
+# HTML output (disabled — Sphinx generates the final HTML)
+#---------------------------------------------------------------------------
+GENERATE_HTML          = NO
+
+#---------------------------------------------------------------------------
+# XML output (consumed by Breathe/Sphinx)
+#---------------------------------------------------------------------------
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+XML_PROGRAMLISTING     = NO
+
+#---------------------------------------------------------------------------
+# LaTeX output (disabled)
+#---------------------------------------------------------------------------
+GENERATE_LATEX         = NO
+
+#---------------------------------------------------------------------------
+# Preprocessor
+#---------------------------------------------------------------------------
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+# Eigen's alignment macro otherwise fuses with the next declaration and breaks RobotState's page.
+PREDEFINED             = EIGEN_MAKE_ALIGNED_OPERATOR_NEW=
+SEARCH_INCLUDES        = YES
+INCLUDE_PATH           = $(REPO_ROOT)/open_apero_core/include \
+                         $(REPO_ROOT)/open_apero_ros/include \
+                         $(REPO_ROOT)/open_apero_voxblox/include \
+                         $(REPO_ROOT)/open_apero_graph_benchmark/include \
+                         $(REPO_ROOT)/open_apero_ros_bridge/include
+
+#---------------------------------------------------------------------------
+# Grouping & navigation
+#---------------------------------------------------------------------------
+SHOW_GROUPED_MEMB_INC  = YES
+SHOW_NAMESPACES        = YES
+SHOW_FILES             = YES
+SHOW_USED_FILES        = YES
+ALPHABETICAL_INDEX     = YES

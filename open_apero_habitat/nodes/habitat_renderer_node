@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""ROS node entry point for the Open Apero Habitat renderer.
+
+Renders RGB-D observations at every camera pose it receives and publishes them over ROS topics.
+"""
+
+from open_apero_habitat.habitat_renderer import main
+
+if __name__ == "__main__":
+    main()

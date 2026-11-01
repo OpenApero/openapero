@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>open_apero_graph_benchmark</name>
+    <version>1.0.0</version>
+    <description>Offline benchmark of the Open Apero graph path planners on synthetic graph instances</description>
+
+    <author email="kaixqu@ethz.ch">Kaixian Qu</author>
+
+    <maintainer email="kaixqu@ethz.ch">Kaixian Qu</maintainer>
+
+    <license>BSD-3-Clause</license>
+
+    <url type="website">https://openapero.github.io/openapero/</url>
+    <url type="repository">https://github.com/OpenApero/openapero</url>
+    <url type="bugtracker">https://github.com/OpenApero/openapero/issues</url>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>open_apero_core</depend>
+    <!-- Header-only RViz-marker and rosconsole adapters. -->
+    <depend>open_apero_ros_bridge</depend>
+    <depend>roscpp</depend>
+    <depend>visualization_msgs</depend>
+    <depend>jsk_rviz_plugins</depend>
+
+    <!-- Launched by run_benchmark.launch with visualize:=true, not linked. -->
+    <exec_depend>rviz</exec_depend>
+
+    <!-- Python package (python/) and tools (scripts/): series aggregation, the plotting stack, and rospkg
+         to find data/ from an install space. -->
+    <exec_depend>open_apero_analysis</exec_depend>
+    <exec_depend>python3-rospkg</exec_depend>
+    <exec_depend>python3-numpy</exec_depend>
+    <exec_depend>python3-matplotlib</exec_depend>
+    <exec_depend>python3-seaborn</exec_depend>
+
+    <!-- Tool unit tests run under pytest, registered with catkin via catkin_run_tests_target. -->
+    <test_depend>python3-pytest</test_depend>
+
+</package>

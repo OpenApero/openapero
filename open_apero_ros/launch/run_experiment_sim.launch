@@ -1,0 +1,231 @@
+<launch>
+  <!-- Arguments -->
+  <!-- Camera max depth [m]: Habitat's max_depth, voxblox_node's max_ray_length_m and the task evaluator's
+       sensor_model/ray_length. -->
+  <arg name="ray_length" default="3.0"/>
+  <!-- The camera's depth boundary: planar for a depth camera, spherical for the paper's model. Feeds
+       voxblox_node and the task evaluator's sensor model. -->
+  <arg name="observation_boundary" default="planar"/>
+  <!-- TSDF truncation distance of voxblox_node [m]. -->
+  <arg name="truncation_distance" default="0.2"/>
+
+  <!-- Sentinel depth for pixels beyond max depth. Only classifies the ray: any
+       value above ray_length works, the integrator clamps the carve to the
+       z = max_ray_length_m observation plane. -->
+  <arg name="far_depth_sentinel" default="10.0"/>
+
+  <!-- Frames of every node: map, robot base, sensor (x forward, z up), optical (z forward, y down). -->
+  <arg name="map_frame" default="world"/>
+  <arg name="base_frame" default="base"/>
+  <arg name="camera_frame" default="camera_frame"/>
+  <arg name="camera_optical_frame" default="camera_optical_frame"/>
+
+  <!-- Voxel size [m] and voxels per block side of voxblox_node and the planner's map. -->
+  <arg name="voxel_size" default="0.1"/>
+  <arg name="voxels_per_side" default="8"/>
+
+  <!-- Planner and experiment -->
+  <!-- Loads config/planners/<planner>.yaml after _common.yaml; names the run's planner folder. -->
+  <arg name="planner" default="nbs"/>
+  <!-- Planner parameter file. Override to run a generated config; `planner` still names the output folder. -->
+  <arg name="planner_config" default="$(find open_apero_ros)/config/planners/$(arg planner).yaml"/>
+  <!-- Active-perception task: explore, recon or points, i.e. config/tasks/<task>.yaml. Empty keeps
+       config/tasks/_common.yaml. -->
+  <arg name="task" default=""/>
+  <!-- Cost budget [s of trajectory time]. Empty keeps config/planners/_common.yaml's value (600). -->
+  <arg name="cost_budget" default=""/>
+  <!-- Scene file config/scenes/<scene_dataset>/<scene_id>.yaml (after _common.yaml) and the Habitat scene. -->
+  <arg name="scene_dataset" default="HSSD"/>
+  <arg name="scene_id" default="102816036"/>
+  <!-- Run outputs land here, outside the source tree: the data root every Open Apero tool shares,
+       $OPEN_APERO_DATA_ROOT, else ~/open_apero_data. Override to relocate one run. -->
+  <arg name="data_root" default="$(eval optenv('OPEN_APERO_DATA_ROOT') or env('HOME') + '/open_apero_data')"/>
+  <!-- Parent of the stamped run directories and of the rosbag. -->
+  <arg name="runs_dir" value="$(arg data_root)/$(arg scene_dataset)/$(arg scene_id)/$(arg planner)"/>
+
+  <!-- Runtime control -->
+  <!-- Minutes from planner start until the coordinator stops the run; 0 disables it. -->
+  <arg name="time_limit" default="10"/>
+  <!-- dummy_controller_node runs trajectories this many times faster than real time. -->
+  <arg name="speedup_factor" default="5"/>
+  <!-- Map snapshots written into the run directory. -->
+  <arg name="num_maps_to_save" default="0"/>
+
+  <!-- Output control -->
+  <!-- Console verbosity filter: one of debug, info, warn, error, fatal. Applies
+       to rosconsole and to open_apero's own logging together. Orthogonal to
+       verbose_planner, which selects how much the planner computes and reports
+       rather than which severities get through. -->
+  <arg name="log_level" default="info"/>
+  <!-- verbose of voxblox_node and of the planner. -->
+  <arg name="verbose_voxblox" default="false"/>
+  <arg name="verbose_planner" default="true"/>
+  <!-- Planner markers, RViz, and the ring visualizer with task:=points. -->
+  <arg name="visualize" default="true"/>
+  <!-- Start RViz here. false keeps the visualization topics for an RViz started elsewhere, e.g. on the host of a
+       Docker run (docker/rviz_host.sh). -->
+  <arg name="rviz" default="$(arg visualize)"/>
+  <!-- Record the topics of open_apero_recording below into <runs_dir>/open_apero_bag_<timestamp>.bag. -->
+  <arg name="record_rosbag" default="false"/>
+  <!-- The planner's log_performance: write performance_log.csv. -->
+  <arg name="log_data" default="true"/>
+
+  <!-- Experiment configuration -->
+  <!-- Shared scene settings first, then the per-scene starting pose. -->
+  <rosparam command="load" file="$(find open_apero_ros)/config/scenes/$(arg scene_dataset)/_common.yaml" subst_value="true"/>
+  <rosparam command="load" file="$(find open_apero_ros)/config/scenes/$(arg scene_dataset)/$(arg scene_id).yaml" subst_value="true"/>
+
+  <!-- Habitat renderer -->
+  <node name="habitat_renderer_node" pkg="open_apero_habitat" type="habitat_renderer_node" output="screen">
+    <!-- Unless the environment sets these, habitat-sim prints only its errors and Magnum's GL context nothing.
+         The node itself drops Magnum's per-asset importer warnings (filter_stderr in habitat_renderer.py). -->
+    <env name="HABITAT_SIM_LOG" value="$(optenv HABITAT_SIM_LOG quiet)"/>
+    <env name="MAGNUM_LOG" value="$(optenv MAGNUM_LOG quiet)"/>
+    <param name="width" value="480"/>
+    <param name="height" value="640"/>
+    <param name="hfov" value="42.0"/>
+    <param name="max_depth" value="$(arg ray_length)"/>
+    <param name="far_depth_sentinel" value="$(arg far_depth_sentinel)"/>
+    <param name="scene_id" value="$(arg scene_id)"/>
+    <param name="camera_optical_frame" value="$(arg camera_optical_frame)"/>
+    <param name="map_frame" value="$(arg map_frame)"/>
+  </node>
+
+  <!-- Experiment coordinator -->
+  <node name="mission_coordinator_node" pkg="open_apero_ros" type="mission_coordinator_node" output="screen" required="true">
+    <remap from="simulation_ready" to="/open_apero/simulation_ready"/>
+    <remap from="collision" to="/open_apero/collision"/>
+    <param name="delay" value="3.0"/>
+    <param name="startup_timeout" value="30.0"/>
+    <param name="time_limit" value="$(arg time_limit)"/>
+    <param name="runs_dir" value="$(arg runs_dir)"/>
+    <param name="ns_planner" value="/open_apero_node"/>
+  </node>
+
+  <!-- Voxblox mapping server -->
+  <node name="voxblox_node" pkg="voxblox_ros" type="esdf_server" output="screen" args="-alsologtostderr">
+    <remap from="sync_pointcloud" to="/open_apero_camera/point_cloud"/>
+    <remap from="sync_camera_transform" to="/camera_transform"/>
+    <param name="sync_queue_size" value="3"/>
+    <param name="use_tf_transforms" value="false"/>
+    <param name="publish_tsdf_map" value="true"/>
+    <param name="publish_esdf_map" value="true"/>
+    <param name="publish_pointclouds" value="false"/>
+    <param name="tsdf_voxel_size" value="$(arg voxel_size)"/>
+    <param name="tsdf_voxels_per_side" value="$(arg voxels_per_side)"/>
+    <param name="truncation_distance" value="$(arg truncation_distance)"/>
+    <param name="color_mode" value="color"/>
+    <param name="method" value="merged"/>
+    <param name="allow_clear" value="true"/>
+    <param name="max_ray_length_m" value="$(arg ray_length)"/>
+    <!-- Planar: the boundary is the z = max_ray_length_m plane, Habitat's depth; only the sentinel lands
+         beyond it. The task evaluator's sensor_model/observation_boundary reads the same arg. -->
+    <param name="observation_boundary" value="$(arg observation_boundary)"/>
+    <param name="verbose" value="$(arg verbose_voxblox)"/>
+    <param name="world_frame" value="$(arg map_frame)"/>
+    <param name="integrator_threads" value="8"/>
+    <param name="traversability_radius" value="1.0"/>
+    <param name="update_esdf_every_n_sec" value="0.05"/>
+    <param name="publish_map_every_n_sec" value="0.05"/>
+    <!-- Mesh updates affect visualization only. -->
+    <param name="update_mesh_every_n_sec" value="0.5"/>
+  </node>
+
+  <!-- Planner. required so a planner death ends the run immediately instead of idling
+       to the timeout cap and being recorded as an ordinary timeout by run_experiments.sh. -->
+  <node name="open_apero_node" pkg="open_apero_ros" type="open_apero_node" output="screen" required="true">
+    <param name="log_level" value="$(arg log_level)"/>
+    <param name="verbose" value="$(arg verbose_planner)"/>
+    <param name="visualize" value="$(arg visualize)"/>
+    <param name="log_performance" value="$(arg log_data)"/>
+    <param name="num_maps_to_save" value="$(arg num_maps_to_save)"/>
+    <param name="map_frame" value="$(arg map_frame)"/>
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <param name="camera_frame" value="$(arg camera_frame)"/>
+    <!-- Shared planner settings first, then the per-planner layer stack. -->
+    <rosparam command="load" file="$(find open_apero_ros)/config/planners/_common.yaml" subst_value="true"/>
+    <rosparam command="load" file="$(arg planner_config)" subst_value="true"/>
+    <!-- Budget override; config/planners/_common.yaml's value stands when the arg is empty.
+         Node-level <param> tags are applied after every <rosparam> load of the node, so they override
+         the YAML in any order. -->
+    <param name="cost_budget" value="$(arg cost_budget)" if="$(eval arg('cost_budget') != '')"/>
+    <remap from="open_apero_node/esdf_map_in" to="voxblox_node/esdf_map_out"/>
+    <remap from="open_apero_node/tsdf_map_in" to="voxblox_node/tsdf_map_out"/>
+    <param name="use_tf_transforms" value="false"/>
+    <param name="tsdf_voxel_size" value="$(arg voxel_size)"/>
+    <param name="tsdf_voxels_per_side" value="$(arg voxels_per_side)"/>
+    <param name="update_esdf_every_n_sec" value="0.0"/>
+    <param name="publish_map_every_n_sec" value="0.0"/>
+    <param name="update_mesh_every_n_sec" value="0.0"/>
+    <param name="publish_traversable" value="false"/>
+  </node>
+
+  <!-- Task evaluator: every planner config reads it from /task_evaluator, cleared first so a reused master
+       keeps no other task's keys. The task file loads after the base file, so its leaves win; task:=points
+       also sets the paper's planning-layer settings. -->
+  <group ns="task_evaluator" clear_params="true">
+    <rosparam command="load" file="$(find open_apero_ros)/config/tasks/_common.yaml" subst_value="true"/>
+    <rosparam command="load" file="$(find open_apero_ros)/config/tasks/$(arg task).yaml" subst_value="true" if="$(eval arg('task') != '')"/>
+    <!-- The camera's range, as voxblox_node integrates it. In a group later tags win, so these override the YAML. -->
+    <param name="sensor_model/ray_length" value="$(arg ray_length)"/>
+    <param name="sensor_model/observation_boundary" value="$(arg observation_boundary)"/>
+  </group>
+  <rosparam command="load" ns="open_apero_node/layers/planning" file="$(find open_apero_ros)/config/tasks/_points_planning.yaml" if="$(eval arg('task') == 'points')"/>
+
+  <!-- Dummy controller -->
+  <node name="dummy_controller_node" pkg="open_apero_controllers" type="dummy_controller_node" output="screen">
+    <param name="publish_camera_transform" value="all"/>
+    <param name="speedup_factor" value="$(arg speedup_factor)"/>
+    <param name="map_frame" value="$(arg map_frame)"/>
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <param name="camera_frame" value="$(arg camera_frame)"/>
+    <param name="camera_optical_frame" value="$(arg camera_optical_frame)"/>
+  </node>
+
+  <!-- RGB-D conversion -->
+  <node name="rgbd_to_pointcloud_node" pkg="open_apero_ros" type="rgbd_to_pointcloud_node" output="screen">
+    <remap from="camera_info" to ="/open_apero_camera/camera_info"/>
+    <remap from="rgb_image" to ="/open_apero_camera/rgb_image"/>
+    <remap from="depth_image" to ="/open_apero_camera/depth_image"/>
+    <remap from="point_cloud" to ="/open_apero_camera/point_cloud"/>
+
+    <param name="ray_min_range" value="0.0"/>
+    <!-- Must pass the sentinel through to Voxblox: the gate is a strict >, and
+         the float32 image value can exceed the exact sentinel, hence the margin. -->
+    <param name="ray_max_range" value="$(eval arg('far_depth_sentinel') + 0.1)"/>
+    <param name="decimation_factor" value="3"/>
+  </node>
+
+  <!-- Collectible point visualization: display-only, so it runs only when RViz does and the
+       point-collection task (task:=points) is active. -->
+  <node name="collectible_points_visualization_node" pkg="open_apero_ros" type="collectible_points_visualization_node" output="screen"
+        if="$(eval arg('visualize') and arg('task') == 'points')">
+    <param name="map_frame" value="$(arg map_frame)"/>
+    <param name="camera_frame" value="$(arg camera_frame)"/>
+    <param name="rotate_speed" value="3.14"/>
+    <param name="publish_rate" value="10"/>
+    <param name="shrink_duration" value="1.0"/>
+    <param name="runner_frame_step" value="2"/>
+    <param name="runner_frame_max" value="32"/>
+  </node>
+
+  <!-- RViz. Without DISABLE_ROS1_EOL_WARNINGS it opens a modal end-of-life dialog and ignores Ctrl+C. -->
+  <node type="rviz" name="rviz_experiment" pkg="rviz" args="-d $(find open_apero_ros)/rviz/experiment.rviz" if="$(arg rviz)">
+    <env name="DISABLE_ROS1_EOL_WARNINGS" value="1"/>
+  </node>
+
+  <!-- Rosbag recording, as <runs_dir>/open_apero_bag_<timestamp>.bag. rosbag does not create the
+       folder, and the coordinator may not have created it yet, hence the mkdir prefix. -->
+  <node pkg="rosbag" type="record" name="open_apero_recording" output="screen"
+       launch-prefix="sh -c 'mkdir -p &quot;$0&quot; &amp;&amp; exec &quot;$@&quot;' $(arg runs_dir)"
+       args="-o $(arg runs_dir)/open_apero_bag
+       /tf
+       /tf_static
+       /voxblox_node/mesh
+       /command/trajectory
+       /next_movement
+       /trajectory_visualization
+       /collectible_point_markers
+       /status_overlay
+       " if="$(arg record_rosbag)"/>
+</launch>

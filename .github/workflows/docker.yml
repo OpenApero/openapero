@@ -1,0 +1,37 @@
+name: Docker
+
+# Builds docker/Dockerfile from a recursive checkout (the voxblox fork is the deps/voxblox submodule)
+# and runs Open Apero's own test suites inside the image (same packages as build_test.yml).
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'master'
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build the image
+        env:
+          DOCKER_BUILDKIT: '1'
+        run: docker build -f docker/Dockerfile -t open_apero:ci .
+
+      - name: Run tests in the image
+        run: |
+          docker run --rm open_apero:ci bash -c 'cd $WS &&
+            OWNED="open_apero_analysis open_apero_controllers open_apero_core open_apero_ros open_apero_graph_benchmark open_apero_habitat open_apero_voxblox" &&
+            catkin build $OWNED --no-deps --no-status --catkin-make-args run_tests -- &&
+            for pkg in $OWNED; do catkin_test_results "build/$pkg" || exit 1; done'

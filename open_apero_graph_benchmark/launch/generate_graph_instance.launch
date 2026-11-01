@@ -1,0 +1,20 @@
+<launch>
+  <!-- Inputs, read only. The defaults are the tracked files; the Python generators write theirs into the default output_folder. -->
+  <arg name="topology_file" default="$(find open_apero_graph_benchmark)/data/graph_topology.txt" />
+  <arg name="gain_model_file" default="$(find open_apero_graph_benchmark)/data/gain_model.txt" />
+
+  <!-- The new instance goes to output_folder/graph_<N+1>/graph.txt, below data_root as in run_benchmark.launch. -->
+  <arg name="data_root" default="$(eval optenv('OPEN_APERO_DATA_ROOT') or env('HOME') + '/open_apero_data')" />
+  <arg name="output_folder" default="$(arg data_root)/graph_benchmark/generated" />
+
+  <!-- Negative means nondeterministic sampling; set a non-negative value for a reproducible instance. -->
+  <arg name="random_seed" default="-1" />
+
+  <!-- required, so roslaunch exits once the instance is written, as run_benchmark.launch does after its sweep. -->
+  <node name="generate_graph_instance_node" pkg="open_apero_graph_benchmark" type="generate_graph_instance_node" output="screen" required="true">
+    <param name="topology_file" value="$(arg topology_file)" />
+    <param name="gain_model_file" value="$(arg gain_model_file)" />
+    <param name="output_folder" value="$(arg output_folder)" />
+    <param name="random_seed" value="$(arg random_seed)" />
+  </node>
+</launch>

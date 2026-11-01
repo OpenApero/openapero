@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>open_apero_voxblox</name>
+    <version>1.0.0</version>
+    <description>Voxblox TSDF/ESDF map backend for Open Apero; needs the OpenApero fork of voxblox</description>
+
+    <author email="kaixqu@ethz.ch">Kaixian Qu</author>
+    <maintainer email="kaixqu@ethz.ch">Kaixian Qu</maintainer>
+
+    <license>BSD-3-Clause</license>
+
+    <url type="website">https://openapero.github.io/openapero/</url>
+    <url type="repository">https://github.com/OpenApero/openapero</url>
+    <url type="bugtracker">https://github.com/OpenApero/openapero/issues</url>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <depend>roscpp</depend>
+    <depend>std_srvs</depend>
+    <depend>open_apero_core</depend>
+    <depend>voxblox_ros</depend>
+    <depend>voxblox</depend>
+</package>

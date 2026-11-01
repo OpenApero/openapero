@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below (preferred-citation)."
+type: software
+title: "Open Apero: Open Active Perception Library for Robotics"
+authors:
+  - family-names: Qu
+    given-names: Kaixian
+  - family-names: Wang
+    given-names: Han
+version: 1.0.0
+date-released: 2026-11-01
+license: BSD-3-Clause
+url: "https://github.com/OpenApero/openapero"
+repository-code: "https://github.com/OpenApero/openapero"
+preferred-citation:
+  type: article
+  title: "An Efficient Beam Search Algorithm for Active Perception in Mobile Robotics"
+  authors:
+    - family-names: Qu
+      given-names: Kaixian
+    - family-names: Wang
+      given-names: Han
+    - family-names: Klemm
+      given-names: Victor
+    - family-names: Cadena
+      given-names: Cesar
+    - family-names: Hutter
+      given-names: Marco
+  journal: "The International Journal of Robotics Research"
+  year: 2026
+  month: 6
+  doi: 10.1177/02783649261455911
+  url: "https://doi.org/10.1177/02783649261455911"

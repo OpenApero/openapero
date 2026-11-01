@@ -1,0 +1,28 @@
+# Python formatting and lint configuration (black, ruff). Not a Python package: catkin builds and
+# installs the Python code through each package's setup.py. Python 3.8 is the ROS Noetic interpreter.
+
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+extend-exclude = "^/(deps|docs/_build|docs/generated)/"
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+extend-exclude = ["deps", "docs/_build", "docs/generated"]
+# The extension-less ROS entry points are Python too.
+extend-include = ["*/nodes/*"]
+# Import roots, so isort classifies the packages as first-party.
+src = [
+    "open_apero_analysis/python",
+    "open_apero_controllers/python",
+    "open_apero_graph_benchmark/python",
+    "open_apero_habitat/python",
+    "open_apero_ros/python",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true

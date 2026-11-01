@@ -1,0 +1,11 @@
+# Tiny apartment.
+# Per-scene overrides; everything else is in _common.yaml.
+# scene_id is stated explicitly because it does not always match the
+# file name -- some HSSD stages carry a numeric suffix.
+map_bounding_volume:
+  scene_id: "102816216"
+target_bounding_volume:
+  scene_id: "102816216"
+
+initial_position_x: -10.0
+initial_position_y: 10.0

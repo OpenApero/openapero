@@ -1,0 +1,6 @@
+# run_experiment_sim.launch task:=recon loads this into /task_evaluator, over _common.yaml.
+type: "SurfaceFrontierEvaluator"
+accurate_frontiers: true
+checking_distance: 2.0
+frontier_voxel_weight: 1.0
+new_voxel_weight: 0.0

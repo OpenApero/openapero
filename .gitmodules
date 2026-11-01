@@ -1,0 +1,3 @@
+[submodule "deps/voxblox"]
+	path = deps/voxblox
+	url = https://github.com/OpenApero/voxblox.git

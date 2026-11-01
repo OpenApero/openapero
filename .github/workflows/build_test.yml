@@ -1,0 +1,85 @@
+name: Build Tests
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'master'
+  pull_request:
+    branches:
+      - '*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {rosdistro: 'noetic', container: 'ros:noetic-ros-base-focal'}
+    container: ${{ matrix.config.container }}
+    steps:
+      # The ROS image has no git, and without it actions/checkout falls back to the REST API, which
+      # cannot fetch submodules.
+      - name: Install git
+        run: apt-get update && apt-get install -y git
+
+      # deps/voxblox is the voxblox fork; its vendored deps/ (catkin_simple, eigen_catkin, ...) have
+      # no rosdep keys.
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y python3-pip python3-catkin-tools autoconf libtool git wget
+          pip3 install osrf-pycommon
+
+      - name: Setup catkin workspace
+        run: |
+          mkdir -p $HOME/catkin_ws/src
+          cd $HOME/catkin_ws
+          catkin init
+          catkin config --extend "/opt/ros/${{ matrix.config.rosdistro }}"
+          catkin config --merge-devel
+          cd src
+          ln -s $GITHUB_WORKSPACE open_apero
+
+      # rosdep needs --include-eol-distros: Noetic is end-of-life and is otherwise skipped.
+      - name: Install dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          cd $HOME/catkin_ws
+          rosdep update --include-eol-distros
+          rosdep install --from-paths src --ignore-src -y --rosdistro ${{ matrix.config.rosdistro }}
+
+      # OR-Tools ships no rosdep key; open_apero_core links it from open_apero_core/ortools.
+      - name: Install OR-Tools
+        run: |
+          cd /tmp
+          wget -q https://github.com/google/or-tools/releases/download/v9.11/or-tools_amd64_ubuntu-20.04_cpp_v9.11.4210.tar.gz
+          tar -xzf or-tools_amd64_ubuntu-20.04_cpp_v9.11.4210.tar.gz
+          mkdir -p $GITHUB_WORKSPACE/open_apero_core/ortools
+          cp -r or-tools_*/include or-tools_*/lib $GITHUB_WORKSPACE/open_apero_core/ortools/
+
+      - name: Build
+        run: |
+          cd $HOME/catkin_ws
+          catkin config --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          catkin build -j$(nproc) -l$(nproc)
+
+      - name: Run tests
+        run: |
+          cd $HOME/catkin_ws
+          # Open Apero's own packages only (--no-deps); eigen_checks' tests do not build.
+          # catkin_test_results fails the step on a failed test.
+          OWNED="open_apero_analysis open_apero_controllers open_apero_core open_apero_ros open_apero_graph_benchmark open_apero_habitat open_apero_voxblox"
+          catkin build $OWNED --no-deps --catkin-make-args run_tests --
+          for pkg in $OWNED; do
+            catkin_test_results "build/$pkg"
+          done

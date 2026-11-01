@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>open_apero_controllers</name>
+  <version>1.0.0</version>
+  <description>Controllers for simulated Open Apero agents: a dummy trajectory-replay controller and a keyboard teleop</description>
+
+  <author email="kaixqu@ethz.ch">Kaixian Qu</author>
+  <author>Han Wang</author>
+  <maintainer email="kaixqu@ethz.ch">Kaixian Qu</maintainer>
+
+  <license>BSD-3-Clause</license>
+
+  <url type="website">https://openapero.github.io/openapero/</url>
+  <url type="repository">https://github.com/OpenApero/openapero</url>
+  <url type="bugtracker">https://github.com/OpenApero/openapero/issues</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>geometry_msgs</depend>
+  <depend>open_apero_msgs</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2_ros</depend>
+
+  <exec_depend>python3-scipy</exec_depend>
+
+  <!-- Unit tests run under pytest, registered with catkin via catkin_run_tests_target. -->
+  <test_depend>python3-pytest</test_depend>
+
+</package>

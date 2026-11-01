@@ -1,0 +1,24 @@
+# Shared base for every task in this directory: the task evaluator, which the planner configs
+# read through `evaluator_args: "/task_evaluator"` (rrt/rrtstar: `following_evaluator_args`).
+# The leading underscore marks it as no value of task:=.
+#
+# run_experiment_sim.launch loads this file into /task_evaluator, then
+# config/tasks/<task>.yaml over it under task:=. As shipped it is the explore task.
+type: "NaiveEvaluator"
+
+only_update_for_updated_map: true
+
+bounding_volume_args: "/target_bounding_volume"
+
+visualize_sensor_view: true
+frontier_min_unknown_ratio: 0.8
+frontier_min_visible_ratio: 0.6
+
+sensor_model:
+  type: "IterativeRayCaster"
+  ray_length: 3.0 # run_experiment_sim.launch overrides it from its ray_length arg
+  observation_boundary: "planar" # run_experiment_sim.launch overrides it from its observation_boundary arg
+  focal_length: 625.58
+  resolution_x: 480 # with focal_length, the Habitat camera's 42 deg hfov
+  resolution_y: 640
+  downsampling_factor: 3.0

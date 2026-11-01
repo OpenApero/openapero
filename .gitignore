@@ -1,0 +1,54 @@
+# catkin workspace spaces
+build/
+devel/
+logs/
+install/
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Doxygen XML (for Breathe) and Sphinx output
+docs/generated/
+docs/_build/
+
+# OR-Tools, unpacked into open_apero_core by the setup
+open_apero_core/ortools/
+
+# Local dataset locations; copy datasets.env.example to create it.
+datasets.env
+
+# Ignore all files in the data directory: it holds the tracked inputs only, and results go below
+# ~/open_apero_data, so anything else here is a stray result tree or figure.
+open_apero_graph_benchmark/data/*
+
+# Un-ignore the main data directory itself
+!open_apero_graph_benchmark/data/
+
+# Un-ignore specific files in the data directory
+!open_apero_graph_benchmark/data/graph_topology.txt
+!open_apero_graph_benchmark/data/gain_model.txt
+
+# Un-ignore the paper's graph instances (every dataset folder's graph_N/graph.txt) and each
+# dataset's reference.json, which verify_benchmark_results.py checks a rerun against.
+# Each level has to be re-opened before the file itself can be matched.
+# Results, figures and .tmp leftovers stay ignored.
+!open_apero_graph_benchmark/data/*/
+open_apero_graph_benchmark/data/*/*
+!open_apero_graph_benchmark/data/*/reference.json
+!open_apero_graph_benchmark/data/*/graph_*/
+open_apero_graph_benchmark/data/*/graph_*/*
+!open_apero_graph_benchmark/data/*/graph_*/graph.txt
+
+# Local catkin opt-outs, IDE and editor files, point-cloud dumps
+CATKIN_IGNORE
+.vscode/
+.idea/
+cmake-build-debug/
+*.pcd
+*~
+.#*
+
+# Local tool state
+.pytest_cache/
+.ruff_cache/

@@ -1,0 +1,107 @@
+<launch>
+
+  <!-- Publish markers and the overlay and start RViz; with edges; at this rate [Hz]. -->
+  <arg name="visualize" default="false" />
+  <arg name="visualize_edges" default="true" />
+  <!-- Per-step diagnostic log lines; slower, same results. -->
+  <arg name="debug_diagnostics" default="false" />
+  <arg name="visualization_rate" default="5.0" />
+
+  <!-- Console verbosity: debug, info, warn, error, fatal. Applies to rosconsole and to the open_apero_core
+       logging::* messages alike. `debug` adds one line per result file on top of the per-block progress;
+       `warn` silences every informational line. Independent of debug_diagnostics, which controls per-step
+       benchmark diagnostics rather than verbosity. -->
+  <arg name="log_level" default="info" />
+
+  <!-- One of: none, goal, everystep, try_every_option. -->
+  <arg name="replan_type" default="try_every_option" />
+
+  <!-- One of: path_gain, path_ratio, expected_gain, table_gain, try_every_option. -->
+  <arg name="objective" default="try_every_option" />
+
+  <!-- Dataset name below data/. -->
+  <arg name="graph_type" default="ap_50x50_clustered_gain_0to100_cost_100" />
+
+  <!-- Dataset folder, read only; replaces data/<graph_type>. -->
+  <arg name="graph_type_folder" default="$(find open_apero_graph_benchmark)/data/$(arg graph_type)" />
+
+  <!-- The dataset folder name, <ap_|op_<R>m_><W>x<H>_..._cost_<N>; perception_radius and cost_budget default to
+       what it encodes. -->
+  <arg name="dataset_name" value="$(eval arg('graph_type_folder').rstrip('/').split('/')[-1])" />
+
+  <!-- Where the result files go: <results_folder>/graph_N/<replan_type>/<objective>/<algorithm>_<parameter>.txt.
+       Runs of every package write below data_root (run_experiment_sim.launch's runs too); never into data/.
+       data_root is the data root every Open Apero tool shares: $OPEN_APERO_DATA_ROOT, else ~/open_apero_data. -->
+  <arg name="data_root" default="$(eval optenv('OPEN_APERO_DATA_ROOT') or env('HOME') + '/open_apero_data')" />
+  <arg name="results_folder" default="$(arg data_root)/graph_benchmark/$(arg dataset_name)" />
+
+  <!-- Dataset folders encode the perception model they belong to, and the two must agree:
+         ap_*      a-priori: the whole graph is visible, so perception_radius must reach the far corner, i.e.
+                   at least the diagonal of the <W>x<H> extent in the dataset name (50x50 needs 70.7).
+         op_<R>m_* online perception with radius R meters, so perception_radius must be R.
+       The default is a numeric R for op_<R>m_ and 100.0 otherwise, which spans every shipped ap_ extent. benchmark_node
+       warns when the dataset name and this radius disagree. -->
+  <arg name="perception_radius"
+       default="$(eval float(arg('dataset_name')[3:].split('m_')[0]) if arg('dataset_name').startswith('op_') and arg('dataset_name')[3:].split('m_')[0].replace('.', '', 1).isdigit() else 100.0)" />
+
+  <!-- Seeds the path planners' tie-break RNGs. Negative means nondeterministic. -->
+  <arg name="random_seed" default="0" />
+
+  <!-- Beam depth of DBS and NBS. -->
+  <arg name="beam_depth" default="100" />
+  <!-- Cost budget per run: N from the dataset name's trailing _cost_<N>, 100.0 for a name without a numeric one. -->
+  <arg name="cost_budget"
+       default="$(eval float(arg('dataset_name').rsplit('_cost_', 1)[1]) if '_cost_' in arg('dataset_name') and arg('dataset_name').rsplit('_cost_', 1)[1].replace('.', '', 1).isdigit() else 100.0)" />
+
+  <!-- Linear SPT and TSP sweep of top_node_percentage: min, max, step (0.50, 0.75, 1.00). -->
+  <arg name="top_node_percentage_min" default="0.5" />
+  <arg name="top_node_percentage_max" default="1.0" />
+  <arg name="percentage_step" default="0.25" />
+
+  <!-- Geometric DBS sweep of beam_width: min, max, factor between widths (1, 100, 10000). -->
+  <arg name="min_beam_width_dbs" default="1" />
+  <arg name="max_beam_width_dbs" default="10000" />
+  <arg name="beam_width_step_dbs" default="100" />
+
+  <!-- Geometric NBS sweep of beam_width: min, max, factor between widths (1, 10, 100). -->
+  <arg name="min_beam_width_nbs" default="1" />
+  <arg name="max_beam_width_nbs" default="100" />
+  <arg name="beam_width_step_nbs" default="10" />
+
+  <!-- required: the launch ends when the sweep does. -->
+  <node name="benchmark_node" pkg="open_apero_graph_benchmark" type="benchmark_node" output="screen" required="true">
+    <param name="visualize" value="$(arg visualize)" />
+    <param name="visualize_edges" value="$(arg visualize_edges)" />
+    <param name="debug_diagnostics" value="$(arg debug_diagnostics)" />
+    <param name="visualization_rate" value="$(arg visualization_rate)" />
+    <param name="log_level" value="$(arg log_level)" />
+
+    <param name="replan_type" value="$(arg replan_type)" />
+    <param name="objective" value="$(arg objective)" />
+    <param name="perception_radius" value="$(arg perception_radius)" />
+
+    <param name="graph_type_folder" value="$(arg graph_type_folder)" />
+    <param name="results_folder" value="$(arg results_folder)" />
+    <param name="random_seed" value="$(arg random_seed)" />
+
+    <param name="beam_depth" value="$(arg beam_depth)" />
+    <param name="cost_budget" value="$(arg cost_budget)" />
+
+    <param name="top_node_percentage_min" value="$(arg top_node_percentage_min)" />
+    <param name="top_node_percentage_max" value="$(arg top_node_percentage_max)" />
+    <param name="percentage_step" value="$(arg percentage_step)" />
+
+    <param name="min_beam_width_dbs" value="$(arg min_beam_width_dbs)" />
+    <param name="max_beam_width_dbs" value="$(arg max_beam_width_dbs)" />
+    <param name="beam_width_step_dbs" value="$(arg beam_width_step_dbs)" />
+
+    <param name="min_beam_width_nbs" value="$(arg min_beam_width_nbs)" />
+    <param name="max_beam_width_nbs" value="$(arg max_beam_width_nbs)" />
+    <param name="beam_width_step_nbs" value="$(arg beam_width_step_nbs)" />
+  </node>
+
+  <node type="rviz" name="rviz_benchmark" pkg="rviz" args="-d $(find open_apero_graph_benchmark)/rviz/benchmark.rviz" if="$(arg visualize)">
+    <env name="DISABLE_ROS1_EOL_WARNINGS" value="1"/>
+  </node>
+
+</launch>

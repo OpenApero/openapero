@@ -1,0 +1,72 @@
+/* Open Apero overrides for sphinx-book-theme, which is built on the PyData Sphinx theme: colors
+   are --pst-* variables, set per mode. */
+
+html[data-theme="light"] {
+    --pst-color-primary: #1976d2;
+    --pst-color-link: #1565c0;
+    --pst-color-link-hover: #0d47a1;
+}
+
+html[data-theme="dark"] {
+    --pst-color-primary: #64b5f6;
+    --pst-color-link: #90caf9;
+    --pst-color-link-hover: #bbdefb;
+}
+
+/* The round logo is square: keep it from pushing the navigation below the fold. */
+.navbar-brand img.logo__image {
+    max-height: 9rem;
+    width: auto;
+}
+
+/* Paths, launch arguments and C++ names in running text and table cells may break anywhere, so
+   they wrap instead of widening the page (on a phone) or overflowing a table column. Docutils wraps
+   each inline literal in a span.pre that would otherwise never wrap. */
+code.literal,
+code.literal span.pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* In a table, "anywhere" would let every column shrink by splitting the identifiers in it. Keys,
+   types and defaults (every column but the last) stay whole; only the last column, the prose
+   description, breaks a literal that cannot fit, such as a long path. */
+table td:not(:last-child) code.literal,
+table td:not(:last-child) code.literal span.pre {
+    overflow-wrap: break-word;
+}
+
+/* Long C++ signatures in the API reference wrap the same way, and so do qualified names in the
+   descriptions of nested members, whose indented column is narrow on a phone. */
+dt.sig,
+dt.sig span.pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+dl.cpp dd {
+    overflow-wrap: break-word;
+}
+
+/* The "Parameters"/"Returns" field lists are a grid whose cells would otherwise never shrink below
+   their longest word. */
+dl.field-list > dt,
+dl.field-list > dd {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+pre {
+    border-radius: 8px;
+}
+
+/* sphinxcontrib-mermaid stretches every diagram to the column width, which blows a small diagram's text
+   up to twice the body size. Diagrams keep their natural size, centred, and shrink only to fit. */
+pre.mermaid > svg,
+.mermaid-container > pre > svg {
+    width: auto !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    margin: 0 auto;
+}

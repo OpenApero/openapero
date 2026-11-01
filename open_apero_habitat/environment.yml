@@ -1,0 +1,22 @@
+# The Python environment habitat_renderer_node runs in (see docs/installation.md#habitat-setup-optional):
+#
+#   conda env create -f open_apero_habitat/environment.yml
+#
+# habitat-sim is not on PyPI; its aihabitat channel ships 0.2.3 for Python 3.8, which brings NumPy and SciPy.
+# rospy, the messages and the workspace come from the PYTHONPATH that devel/setup.bash sets; the other packages are
+# their pure-Python dependencies, catkin_pkg and empy for rebuilding the node's launcher, and pytest for the tests.
+name: habitat
+channels:
+  - aihabitat
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.8
+  - habitat-sim=0.2.3
+  - rospkg
+  - catkin_pkg
+  - empy=3.3.4
+  - pyyaml
+  - defusedxml
+  - netifaces
+  - pytest

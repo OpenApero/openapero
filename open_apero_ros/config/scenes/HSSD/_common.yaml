@@ -1,0 +1,23 @@
+# Settings shared by every HSSD scene. Loaded before the per-scene file, which
+# supplies only what actually differs. The leading underscore marks it as no
+# value of scene_id:=.
+#
+# Loaded through roslaunch with subst_value="true": the env/find substitutions
+# below are resolved by roslaunch, NOT by a bare `rosparam load`. Set the
+# variables first -- see datasets.env.example at the repository root.
+# Comments are substituted too, so they hold no literal substitution expression.
+scene_dataset_config_file: "$(env HSSD_DATA_ROOT)/versioned_data/hssd-hab/hssd-hab.scene_dataset_config.json"
+
+map_bounding_volume:
+  mesh_folder: "$(env HSSD_DATA_ROOT)/scene_datasets/hssd-hab/stages"
+  margin: 0.2
+
+target_bounding_volume:
+  mesh_folder: "$(env HSSD_DATA_ROOT)/scene_datasets/hssd-hab/stages"
+  margin: 0.2
+
+initial_position_z: 1.0
+initial_quaternion_x: 0.0
+initial_quaternion_y: 0.0
+initial_quaternion_z: 0.0
+initial_quaternion_w: 1.0

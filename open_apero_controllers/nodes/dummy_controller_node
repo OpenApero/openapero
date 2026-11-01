@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+"""ROS node entry point for the dummy trajectory-replay controller."""
+
+from open_apero_controllers.dummy_controller import main
+
+if __name__ == "__main__":
+    main()

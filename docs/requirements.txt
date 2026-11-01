@@ -1,0 +1,7 @@
+# Tested together: Sphinx 8.2.3, Breathe 5.1.0, MyST-Parser 5.1.0, sphinx-book-theme 1.4.0,
+# sphinxcontrib-mermaid 2.1.1. Sphinx 8.2 needs Python 3.11 or newer.
+sphinx>=8.2,<9
+breathe>=5.1,<6
+myst-parser>=5.1,<6
+sphinx-book-theme>=1.4,<2
+sphinxcontrib-mermaid>=2.1,<3

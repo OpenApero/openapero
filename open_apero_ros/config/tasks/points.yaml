@@ -1,0 +1,3 @@
+# run_experiment_sim.launch task:=points loads this (subst_value) into /task_evaluator, over _common.yaml.
+type: "PointsEvaluator"
+points_file: "$(find open_apero_ros)/data/points_3d.csv"

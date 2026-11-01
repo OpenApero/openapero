@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>open_apero_core</name>
+    <version>1.0.0</version>
+    <description>ROS-independent core of Open Apero: the planning loop, the plugin interfaces, and the built-in generators, evaluators, path planners, robot and sensor models</description>
+
+    <author email="kaixqu@ethz.ch">Kaixian Qu</author>
+    <author>Han Wang</author>
+
+    <maintainer email="kaixqu@ethz.ch">Kaixian Qu</maintainer>
+
+    <license>BSD-3-Clause</license>
+
+    <url type="website">https://openapero.github.io/openapero/</url>
+    <url type="repository">https://github.com/OpenApero/openapero</url>
+    <url type="bugtracker">https://github.com/OpenApero/openapero/issues</url>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>eigen_catkin</depend>
+    <depend>assimp</depend>
+    <depend>boost</depend>
+    <depend>ompl</depend>
+    <!-- OR-Tools is not a rosdep key; see docs/installation.md, "OR-Tools Setup". -->
+
+    <test_depend>gtest</test_depend>
+</package>

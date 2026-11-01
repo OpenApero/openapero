@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>open_apero</name>
+  <version>1.0.0</version>
+  <description>Open Apero (Open Active PErception Library for RObotics): metapackage grouping every Open Apero package</description>
+
+  <author email="kaixqu@ethz.ch">Kaixian Qu</author>
+
+  <maintainer email="kaixqu@ethz.ch">Kaixian Qu</maintainer>
+
+  <license>BSD-3-Clause</license>
+
+  <url type="website">https://openapero.github.io/openapero/</url>
+  <url type="repository">https://github.com/OpenApero/openapero</url>
+  <url type="bugtracker">https://github.com/OpenApero/openapero/issues</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>open_apero_core</exec_depend>
+  <exec_depend>open_apero_ros</exec_depend>
+  <exec_depend>open_apero_ros_bridge</exec_depend>
+  <exec_depend>open_apero_voxblox</exec_depend>
+  <exec_depend>open_apero_graph_benchmark</exec_depend>
+  <exec_depend>open_apero_msgs</exec_depend>
+  <exec_depend>open_apero_analysis</exec_depend>
+  <exec_depend>open_apero_habitat</exec_depend>
+  <exec_depend>open_apero_controllers</exec_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>

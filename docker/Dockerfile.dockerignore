@@ -1,0 +1,28 @@
+# Build context is the repository root; it should hold what a fresh `git clone --recursive` does
+# (.git included: the build records its git provenance in run_manifest.yaml), and no local build
+# products, tool state or data.
+.ruff_cache
+open_apero_core/ortools
+docs/_build
+docs/generated
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+datasets.env
+build
+devel
+logs
+**/CATKIN_IGNORE
+**/.vscode
+**/.idea
+**/.claude
+**/cmake-build-debug
+**/*.pcd
+
+# Graph benchmark: only the tracked inputs, each dataset's graph_N/graph.txt and reference.json;
+# result trees and figures stay out. Mirrors .gitignore.
+open_apero_graph_benchmark/data/*
+!open_apero_graph_benchmark/data/graph_topology.txt
+!open_apero_graph_benchmark/data/gain_model.txt
+!open_apero_graph_benchmark/data/*/reference.json
+!open_apero_graph_benchmark/data/*/graph_*/graph.txt

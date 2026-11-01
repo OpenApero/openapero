@@ -1,0 +1,34 @@
+name: Portability
+
+# Runs the hooks of .pre-commit-config.yaml on every tracked file: the C++ and Python formatting
+# (clang-format, black, ruff), no machine-specific absolute paths, which would make a fresh clone
+# unusable on any other machine (see datasets.env.example for the environment-variable contract),
+# and well-formed launch files.
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'master'
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portability:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run the pre-commit hooks
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files

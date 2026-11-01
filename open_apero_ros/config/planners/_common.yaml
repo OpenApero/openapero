@@ -1,0 +1,63 @@
+# Shared base for every planner config in this directory. The leading underscore
+# marks it as no value of planner:=.
+#
+# run_experiment_sim.launch loads this file into the node's private namespace
+# first, then `config/planners/<planner>.yaml` on top of it. The per-planner files hold
+# only their `layers.planning` block, so neither file is a complete config on
+# its own -- anything loading a planner config directly must load this one too.
+#
+# Keys here are the ones that do not vary by planner. Do not shadow them from a
+# planner file: the two are kept leaf-disjoint so the merge order never matters.
+use_tf: false
+wait_for_map_updated: true
+
+target_position_threshold: 0.10
+target_angle_threshold: 0.20
+
+cost_budget: 600
+
+cost_computer:
+  type: "TrajectoryTime"
+
+verbose_plugins: true
+build_plugins_on_init: true
+
+visualize: true
+color_past_trajectory_by_budget: true
+
+map:
+  type: "VoxbloxMap"
+
+robot:
+  type: "SimpleFallbackRobot"
+  visualize: false
+  max_linear_velocity: 0.5
+  max_yaw_rate: 1.6
+  time_step: 0.2
+  sensor_mount_type: "fixed"
+  collision_sphere_x: 0.0
+  collision_sphere_y: 0.0
+  collision_sphere_z: 0.0
+  collision_sphere_r: 0.3
+  bounding_volume_args: "/map_bounding_volume"
+  ompl_planner: "RRTstar"
+  ompl_state_space_type: R3 # R3 (3D position) or R3Yaw (3D position plus yaw); R2 and SE2 are accepted aliases
+  ompl_log_level: warn # options: info, warn, error, none
+  ompl_planning_time: 0.002
+  ompl_resolution: 0.10
+  ompl_max_range: 3.0
+  safe_radius: 0.0
+  num_orientation_candidates: 8
+  sample_z: true
+
+layers:
+
+  backtracking:
+    type: "BacktrackingLayer"
+    priority: -1000
+    promoted_priority: 1000
+    backtracker:
+      type: "RotateReverse"
+      rotation_step: 0.3
+      initial_rotate_angle: 6.28
+      queue_size: 100

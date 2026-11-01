@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 400" width="660" role="img" aria-labelledby="gct-title">
+  <title id="gct-title">Gain-cost table: observed candidate paths, retained Pareto knots, the optional concave envelope, and a valueAt query at the budget left after the candidate path, C − cost.</title>
+  <style>
+    text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 12px; fill: #898781; }
+    .title { font-size: 13px; font-weight: 600; }
+    .axis { stroke: #898781; stroke-width: 1; fill: none; }
+    .frontier { stroke: #2a78d6; stroke-width: 2; fill: none; }
+    .extrapolation { stroke: #2a78d6; stroke-width: 2; fill: none; stroke-dasharray: 6 5; }
+    .envelope { stroke: #eb6834; stroke-width: 2; fill: none; stroke-dasharray: 7 4; }
+    .knot { fill: #2a78d6; }
+    .candidate { fill: #898781; fill-opacity: 0.45; }
+    .query { stroke: #898781; stroke-width: 1.25; fill: none; stroke-dasharray: 3 4; }
+    .leader { stroke: #898781; stroke-width: 1; stroke-opacity: 0.6; fill: none; }
+  </style>
+
+  <text class="title" x="16" y="24">Gain-cost table (table_gain objective)</text>
+
+  <!-- Axes -->
+  <path class="axis" d="M 70 60 L 70 340 L 600 340"/>
+  <text x="70" y="48" text-anchor="middle">gain</text>
+  <text x="600" y="360" text-anchor="end">path cost</text>
+
+  <!-- Concave envelope: upper concave hull of {(0,0)} and the knots. Drawn under the
+       frontier, so it is visible only where the hull departs from it (the dropped knot). -->
+  <polyline class="envelope" points="70,340 130,280 210,232 395,136 480,118"/>
+
+  <!-- Interpolated frontier through the retained Pareto knots, anchored at the origin -->
+  <polyline class="frontier" points="70,340 130,280 210,232 295,205 395,136 480,118"/>
+  <!-- Extrapolation beyond the last knot along the last segment's slope -->
+  <line class="extrapolation" x1="480" y1="118" x2="590" y2="95"/>
+
+  <!-- valueAt query at the budget left after the candidate path, C - cost -->
+  <line class="query" x1="345" y1="340" x2="345" y2="170"/>
+  <line class="query" x1="345" y1="170" x2="70" y2="170"/>
+  <line class="axis" x1="345" y1="340" x2="345" y2="346"/>
+  <line class="axis" x1="64" y1="170" x2="70" y2="170"/>
+  <text x="345" y="360" text-anchor="middle">C − cost</text>
+  <text x="78" y="162">valueAt(C − cost)</text>
+
+  <!-- Observed candidate paths (dominated: a knot at no more cost has at least the gain) -->
+  <circle class="candidate" cx="165" cy="315" r="3.5"/>
+  <circle class="candidate" cx="150" cy="304" r="3.5"/>
+  <circle class="candidate" cx="225" cy="262" r="3.5"/>
+  <circle class="candidate" cx="240" cy="277" r="3.5"/>
+  <circle class="candidate" cx="310" cy="225" r="3.5"/>
+  <circle class="candidate" cx="330" cy="250" r="3.5"/>
+  <circle class="candidate" cx="360" cy="214" r="3.5"/>
+  <circle class="candidate" cx="420" cy="175" r="3.5"/>
+  <circle class="candidate" cx="450" cy="150" r="3.5"/>
+
+  <!-- Retained Pareto knots (gain strictly increasing with cost) -->
+  <circle class="knot" cx="130" cy="280" r="4.5"/>
+  <circle class="knot" cx="210" cy="232" r="4.5"/>
+  <circle class="knot" cx="295" cy="205" r="4.5"/>
+  <circle class="knot" cx="395" cy="136" r="4.5"/>
+  <circle class="knot" cx="480" cy="118" r="4.5"/>
+
+  <!-- Direct labels -->
+  <text x="100" y="205">retained Pareto knots</text>
+  <line class="leader" x1="200" y1="210" x2="207" y2="225"/>
+  <text x="180" y="150">concave envelope (optional)</text>
+  <text x="236" y="246">dropped by hull</text>
+  <line class="leader" x1="292" y1="235" x2="294" y2="211"/>
+  <text x="360" y="262">observed candidate paths</text>
+  <text x="500" y="140">linear extrapolation</text>
+</svg>

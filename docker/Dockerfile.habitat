@@ -1,0 +1,51 @@
+# syntax=docker/dockerfile:1
+#
+# Open Apero with Habitat-sim for the simulated experiments: layers Miniforge and the conda environment
+# of open_apero_habitat/environment.yml, with habitat-sim's headless (EGL) build, onto the image
+# docker/Dockerfile builds. Build that image first, then (the context is unused):
+#
+#   docker build -f docker/Dockerfile.habitat -t open_apero:habitat .
+#   docker/run.sh --gpu --image open_apero:habitat -- \
+#     roslaunch open_apero_ros run_experiment_sim.launch planner:=nbs rviz:=false
+#
+# See docker/README.md.
+
+ARG BASE_IMAGE=open_apero:latest
+FROM ${BASE_IMAGE}
+
+ARG MINIFORGE_URL=https://github.com/conda-forge/miniforge/releases/download/26.5.3-0/Miniforge3-26.5.3-0-Linux-x86_64.sh
+ENV CONDA_DIR=/opt/conda
+ENV HABITAT_ENV=${CONDA_DIR}/envs/habitat
+SHELL ["/bin/bash", "-c"]
+
+# habitat-sim renders through the GLVND EGL loader; the NVIDIA Container Toolkit mounts only the
+# driver's vendor libraries (NVIDIA_DRIVER_CAPABILITIES=all, set by docker/run.sh --gpu), not the
+# vendor file that points GLVND at them, so the image ships it, as NVIDIA's OpenGL images do; without
+# it habitat-sim finds no EGL device for the GPU. On a host without the NVIDIA library, GLVND skips it.
+RUN apt-get update && apt-get install -y libegl1 libgl1 libglvnd0 libopengl0 \
+ && rm -rf /var/lib/apt/lists/* \
+ && printf '{"file_format_version": "1.0.0", "ICD": {"library_path": "libEGL_nvidia.so.0"}}\n' \
+      > /usr/share/glvnd/egl_vendor.d/10_nvidia.json
+
+# The environment file comes with the base image's source tree; `headless` switches habitat-sim to
+# its EGL build.
+RUN wget -q -O /tmp/miniforge.sh "${MINIFORGE_URL}" \
+ && bash /tmp/miniforge.sh -b -p "${CONDA_DIR}" && rm /tmp/miniforge.sh \
+ && "${CONDA_DIR}/bin/conda" env create -q -p "${HABITAT_ENV}" \
+      -f src/open_apero/open_apero_habitat/environment.yml \
+ && "${CONDA_DIR}/bin/conda" install -y -q -p "${HABITAT_ENV}" \
+      --override-channels -c aihabitat -c conda-forge headless \
+ && "${CONDA_DIR}/bin/conda" clean -afy
+
+# The Habitat node must run on the environment's interpreter: rebuild its devel-space relay with it.
+# Everything else keeps the system Python 3.8 the workspace was built with. build/open_apero_habitat
+# stays: its CMake cache holds the interpreter, so a later `catkin build` keeps it.
+RUN source /opt/ros/noetic/setup.bash \
+ && catkin build open_apero_habitat --no-deps --no-status \
+      --cmake-args "-DPYTHON_EXECUTABLE=${HABITAT_ENV}/bin/python3" \
+ && head -1 devel/lib/open_apero_habitat/habitat_renderer_node | grep -qx "#!${HABITAT_ENV}/bin/python3" \
+ && rm -rf logs/open_apero_habitat
+
+# The environment must see habitat_sim and the ROS side together (rendering needs a GPU, which a build has not).
+RUN source devel/setup.bash \
+ && "${HABITAT_ENV}/bin/python3" -c "import habitat_sim, rospy, open_apero_habitat; print(habitat_sim.__version__)"

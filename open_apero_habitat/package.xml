@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>open_apero_habitat</name>
+  <version>1.0.0</version>
+  <description>Habitat-sim RGB-D renderer node for Open Apero simulation experiments</description>
+
+  <license>BSD-3-Clause</license>
+
+  <url type="website">https://openapero.github.io/openapero/</url>
+  <url type="repository">https://github.com/OpenApero/openapero</url>
+  <url type="bugtracker">https://github.com/OpenApero/openapero/issues</url>
+
+  <author email="kaixqu@ethz.ch">Kaixian Qu</author>
+  <maintainer email="kaixqu@ethz.ch">Kaixian Qu</maintainer>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>rospy</depend>
+
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-scipy</exec_depend>
+  <!-- habitat_sim is not declared: it has no rosdep key and is installed from conda (see README.md). -->
+
+  <test_depend>python3-pytest</test_depend>
+
+</package>

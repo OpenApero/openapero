@@ -1,0 +1,11 @@
+# Medium apartment, completely indoor, almost rectangular.
+# Per-scene overrides; everything else is in _common.yaml.
+# scene_id is stated explicitly because it does not always match the
+# file name -- some HSSD stages carry a numeric suffix.
+map_bounding_volume:
+  scene_id: "103997445_171030492"
+target_bounding_volume:
+  scene_id: "103997445_171030492"
+
+initial_position_x: 4.0
+initial_position_y: 4.0

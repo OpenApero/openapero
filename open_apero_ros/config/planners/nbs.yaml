@@ -1,0 +1,31 @@
+# NBS -- node-wise beam search over an RRAG graph, gain from the task evaluator.
+#
+# Delta on top of _common.yaml beside it, which the launch file loads first. The evaluator is read
+# from /task_evaluator, where the launch file loads config/tasks/_common.yaml.
+layers:
+
+  planning:
+    type: "PlanningLayer"
+    priority: 0
+    replan_num_steps: 5
+    max_expansions: 50
+
+    generator:
+      type: "RRAG"
+
+      sample_max_tries: 1000
+
+      min_edge_length: 1.5
+      max_edge_length: 3.0
+      visualize_edges: false
+
+    evaluator_args: "/task_evaluator"
+
+    path_planner:
+      type: "GraphNodeWiseBeamSearch"
+      objective: "expected_gain"
+      is_gain_correlated: false
+
+      beam_width: 1
+      beam_depth: 100
+      check_previous_path: false

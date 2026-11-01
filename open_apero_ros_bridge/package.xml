@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>open_apero_ros_bridge</name>
+    <version>1.0.0</version>
+    <description>Header-only adapters between open_apero types and ROS: message conversions and the rosconsole logging bridge</description>
+
+    <author email="kaixqu@ethz.ch">Kaixian Qu</author>
+
+
+    <maintainer email="kaixqu@ethz.ch">Kaixian Qu</maintainer>
+
+    <license>BSD-3-Clause</license>
+
+    <url type="website">https://openapero.github.io/openapero/</url>
+    <url type="repository">https://github.com/OpenApero/openapero</url>
+    <url type="bugtracker">https://github.com/OpenApero/openapero/issues</url>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <!-- Adapters only, no backends: a node that needs to convert a marker or route its logging must not
+         have to build voxblox, pcl_ros or cv_bridge to do it. Keep this list to what the headers include. -->
+    <depend>eigen_catkin</depend>
+    <depend>geometry_msgs</depend>
+    <depend>jsk_rviz_plugins</depend>
+    <depend>open_apero_core</depend>
+    <depend>open_apero_msgs</depend>
+    <depend>roscpp</depend>
+    <depend>std_msgs</depend>
+    <depend>visualization_msgs</depend>
+
+</package>

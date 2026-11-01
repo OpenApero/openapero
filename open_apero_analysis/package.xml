@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>open_apero_analysis</name>
+    <version>1.0.0</version>
+    <description>
+        ROS-free analysis library for Open Apero run artifacts and numeric
+        time-series aggregation. It loads performance logs and run metadata into
+        one run object. Depends on no other Open Apero package so both the
+        experiment tools of open_apero_ros and the graph benchmark's plots can
+        consume it without a dependency cycle.
+    </description>
+
+    <author email="kaixqu@ethz.ch">Kaixian Qu</author>
+    <maintainer email="kaixqu@ethz.ch">Kaixian Qu</maintainer>
+
+    <license>BSD-3-Clause</license>
+
+    <url type="website">https://openapero.github.io/openapero/</url>
+    <url type="repository">https://github.com/OpenApero/openapero</url>
+    <url type="bugtracker">https://github.com/OpenApero/openapero/issues</url>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <exec_depend>python3-yaml</exec_depend>
+    <exec_depend>python3-numpy</exec_depend>
+    <!-- performance_overview renders the CPU-time chart. -->
+    <exec_depend>python3-matplotlib</exec_depend>
+
+    <!-- Unit tests run under pytest, registered with catkin via catkin_run_tests_target. -->
+    <test_depend>python3-pytest</test_depend>
+</package>

@@ -1,0 +1,11 @@
+format_version: 1
+end_reason: budget_exhausted
+cycles: 42
+total_cost: 601.25
+cost_budget: .inf
+total_path_length: 87.5
+total_path_duration: 601.25
+num_visited_nodes: 43
+elapsed_wall_time_s: 312.75
+real_accumulated_gain:
+  "planning": 1234.5

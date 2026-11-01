@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>open_apero_ros</name>
+    <version>1.0.0</version>
+    <description>ROS integration for Open Apero: the planner node, the ROS-side plugins, and the launch files, configs and scripts for simulated experiments</description>
+
+    <author email="kaixqu@ethz.ch">Kaixian Qu</author>
+    <author>Han Wang</author>
+
+    <maintainer email="kaixqu@ethz.ch">Kaixian Qu</maintainer>
+
+    <license>BSD-3-Clause</license>
+
+    <url type="website">https://openapero.github.io/openapero/</url>
+    <url type="repository">https://github.com/OpenApero/openapero</url>
+    <url type="bugtracker">https://github.com/OpenApero/openapero/issues</url>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <!-- Planning stack: the core library, the message definitions and the
+         header-only ROS conversion adapters. -->
+    <depend>open_apero_core</depend>
+    <depend>open_apero_msgs</depend>
+    <depend>open_apero_ros_bridge</depend>
+
+    <!-- The map backend: open_apero_node loads it through plugin_libraries,
+         and run_experiment_sim.launch starts voxblox_ros's esdf_server. -->
+    <exec_depend>open_apero_voxblox</exec_depend>
+    <exec_depend>voxblox_ros</exec_depend>
+
+    <!-- ROS client libraries and the message packages the nodes include. -->
+    <depend>roscpp</depend>
+    <depend>rospy</depend>
+    <depend>std_msgs</depend>
+    <depend>std_srvs</depend>
+    <depend>sensor_msgs</depend>
+    <depend>geometry_msgs</depend>
+    <depend>visualization_msgs</depend>
+    <depend>nav_msgs</depend>
+    <depend>tf2</depend>
+    <depend>tf2_ros</depend>
+
+    <!-- RGB-D to point cloud conversion. message_filters synchronizes the
+         camera-info/rgb/depth triple. -->
+    <depend>cv_bridge</depend>
+    <depend>message_filters</depend>
+    <depend>pcl_conversions</depend>
+    <depend>pcl_ros</depend>
+
+    <!-- OverlayText and Screenshot, used for the RViz status overlay. -->
+    <depend>jsk_rviz_plugins</depend>
+
+    <!-- Python-only: imported by the analysis/plotting tools in scripts/,
+         never compiled against. -->
+    <exec_depend>open_apero_analysis</exec_depend>
+
+    <!-- Launched by run_experiment_sim.launch, not linked. -->
+    <exec_depend>open_apero_habitat</exec_depend>
+    <exec_depend>open_apero_controllers</exec_depend>
+    <exec_depend>rviz</exec_depend>
+    <exec_depend>rosbag</exec_depend>
+    <!-- Mesh display in rviz/experiment.rviz. -->
+    <exec_depend>voxblox_rviz_plugin</exec_depend>
+
+    <!-- Python analysis/plotting runtime deps (scripts/). -->
+    <exec_depend>python3-numpy</exec_depend>
+    <exec_depend>python3-matplotlib</exec_depend>
+    <exec_depend>python3-seaborn</exec_depend>
+
+    <!-- Unit tests run under pytest, registered with catkin via catkin_run_tests_target. -->
+    <test_depend>python3-pytest</test_depend>
+    <test_depend>python3-yaml</test_depend>
+
+</package>
